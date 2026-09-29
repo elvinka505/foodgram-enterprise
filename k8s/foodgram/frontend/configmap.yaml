@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-nginx-config
+  namespace: foodgram
+data:
+  default.conf: |
+    server {
+        listen 80;
+        client_max_body_size 10M;
+
+        location /api/ {
+            proxy_set_header Host $http_host;
+            proxy_pass http://backend:8000/api/;
+        }
+
+        location /admin/ {
+            proxy_set_header Host $http_host;
+            proxy_pass http://backend:8000/admin/;
+        }
+
+        location ~ ^/s/[^/]+/?$ {
+            proxy_set_header Host $http_host;
+            proxy_pass http://backend:8000$request_uri;
+        }
+
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+            try_files $uri $uri/ /index.html;
+        }
+    }
