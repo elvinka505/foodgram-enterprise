@@ -17,7 +17,7 @@ spec:
         - name: migrate
           image: elvinka505/foodgram-backend:0.1.0
           command: ["python", "manage.py", "migrate", "--noinput"]
-          envFrom:
+          envFrom: &backend-env
             - configMapRef:
                 name: backend-config
             - secretRef:
@@ -30,13 +30,7 @@ spec:
           ports:
             - containerPort: 8000
               name: http
-          envFrom:
-            - configMapRef:
-                name: backend-config
-            - secretRef:
-                name: backend-secret
-            - secretRef:
-                name: postgres-secret
+          envFrom: *backend-env
           readinessProbe:
             httpGet:
               path: /admin/login/
