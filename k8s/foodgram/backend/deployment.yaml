@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: foodgram
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      initContainers:
+        - name: migrate
+          image: elvinka505/foodgram-backend:0.1.0
+          command: ["python", "manage.py", "migrate", "--noinput"]
+          envFrom: &backend-env
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secret
+            - secretRef:
+                name: postgres-secret
+      containers:
+        - name: backend
+          image: elvinka505/foodgram-backend:0.1.0
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom: *backend-env
+          readinessProbe:
+            httpGet:
+              path: /admin/login/
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: localhost
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /admin/login/
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: localhost
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
