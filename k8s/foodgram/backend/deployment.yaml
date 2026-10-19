@@ -15,7 +15,7 @@ spec:
     spec:
       initContainers:
         - name: migrate
-          image: elvinka505/foodgram-backend:0.1.0
+          image: elvinka505/foodgram-backend:0.1.1
           command: ["python", "manage.py", "migrate", "--noinput"]
           envFrom: &backend-env
             - configMapRef:
@@ -26,7 +26,7 @@ spec:
                 name: postgres-secret
       containers:
         - name: backend
-          image: elvinka505/foodgram-backend:0.1.0
+          image: elvinka505/foodgram-backend:0.1.1
           ports:
             - containerPort: 8000
               name: http
