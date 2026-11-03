@@ -13,22 +13,43 @@ spec:
       labels:
         app: frontend
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: frontend
-          image: elvinka505/foodgram-frontend:0.1.0
+          image: elvinka505/foodgram-frontend:0.1.1
           ports:
-            - containerPort: 80
+            - containerPort: 8080
+              name: http
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
           readinessProbe:
             httpGet:
               path: /
-              port: 80
+              port: http
             initialDelaySeconds: 3
             periodSeconds: 5
           volumeMounts:
             - name: nginx-config
               mountPath: /etc/nginx/conf.d/default.conf
               subPath: default.conf
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: nginx-run
+              mountPath: /tmp
       volumes:
         - name: nginx-config
           configMap:
             name: frontend-nginx-config
+        - name: nginx-cache
+          emptyDir: {}
+        - name: nginx-run
+          emptyDir: {}
