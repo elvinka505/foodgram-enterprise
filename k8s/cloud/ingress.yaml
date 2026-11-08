@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: foodgram
+  namespace: foodgram
+  annotations:
+    cert-manager.io/cluster-issuer: yc-clusterissuer
+    gwin.yandex.cloud/groupName: foodgram
+    gwin.yandex.cloud/externalIPv4Address: auto
+    gwin.yandex.cloud/securityGroups: ${ALB_SG_ID}
+spec:
+  ingressClassName: gwin-default
+  tls:
+    - hosts:
+        - ${DOMAIN}
+      secretName: foodgram-tls
+  rules:
+    - host: ${DOMAIN}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80
